@@ -5,7 +5,9 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	// "github.com/mliu1204/perceptioserver.git/cmd/api"
 )
+
 
 type location struct {
 	ID      string `json:"id"`
@@ -24,6 +26,13 @@ func getLocations(c *gin.Context) {
 	// fmt.Println(SignURL("https://maps.googleapis.com/maps/api/streetview?size=400x400&location=51.0899296,-113.9803&fov=80&heading=70&pitch=0&key=AIzaSyCo4C8j7kGJNFnr4hjK3KrANonXc5Dq56c", "gy3J-mcPumwIoQvr_KUjsFjNm-Y="))
 }
 
+func getPictures(c *gin.Context){
+	// url := "https://maps.googleapis.com/maps/api/streetview?size=400x400&location=51.0899296,-113.9803&fov=80&heading=70&pitch=0&key=AIzaSyCo4C8j7kGJNFnr4hjK3KrANonXc5Dq56c"
+	// signedURL := api.SignURL(url, "gy3J-mcPumwIoQvr_KUjsFjNm-Y=")
+	signedURL := "heillow"
+	c.IndentedJSON(http.StatusOK, signedURL)
+}
+
 func main() {
 	router := gin.Default()
 
@@ -34,6 +43,7 @@ func main() {
         AllowCredentials: true,
     }))
 	router.GET("/locations", getLocations)
+	router.GET("/picture", getPictures)
 
 	router.Run(":8080")
 }
