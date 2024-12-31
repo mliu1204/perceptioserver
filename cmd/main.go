@@ -1,11 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	// "github.com/mliu1204/perceptioserver.git/cmd/api"
+	"github.com/mliu1204/perceptioserver.git/cmd/api"
 )
 
 
@@ -27,9 +28,16 @@ func getLocations(c *gin.Context) {
 }
 
 func getPictures(c *gin.Context){
-	// url := "https://maps.googleapis.com/maps/api/streetview?size=400x400&location=51.0899296,-113.9803&fov=80&heading=70&pitch=0&key=AIzaSyCo4C8j7kGJNFnr4hjK3KrANonXc5Dq56c"
-	// signedURL := api.SignURL(url, "gy3J-mcPumwIoQvr_KUjsFjNm-Y=")
-	signedURL := "heillow"
+	curLocation := c.Query("coordinates")
+	url := "https://maps.googleapis.com/maps/api/streetview?size=400x400&location=" + curLocation + "&fov=80&heading=70&pitch=0&key=AIzaSyCo4C8j7kGJNFnr4hjK3KrANonXc5Dq56c"
+	fmt.Println(url)
+	signedURL, err := api.SignURL(url, "gy3J-mcPumwIoQvr_KUjsFjNm-Y=")
+	if (err != nil){
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "resource ID is required",
+		})
+		return
+	}  
 	c.IndentedJSON(http.StatusOK, signedURL)
 }
 
@@ -43,7 +51,7 @@ func main() {
         AllowCredentials: true,
     }))
 	router.GET("/locations", getLocations)
-	router.GET("/picture", getPictures)
+	router.GET("/pictures", getPictures)
 
 	router.Run(":8080")
 }
