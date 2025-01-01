@@ -1,11 +1,13 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/mliu1204/perceptioserver.git/cmd/api"
 )
 
@@ -24,14 +26,14 @@ var locations = []location{
 
 func getLocations(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, locations)
-	// fmt.Println(SignURL("https://maps.googleapis.com/maps/api/streetview?size=400x400&location=51.0899296,-113.9803&fov=80&heading=70&pitch=0&key=AIzaSyCo4C8j7kGJNFnr4hjK3KrANonXc5Dq56c", "gy3J-mcPumwIoQvr_KUjsFjNm-Y="))
 }
 
 func getPictures(c *gin.Context){
 	curLocation := c.Query("coordinates")
 	url := "https://maps.googleapis.com/maps/api/streetview?size=400x400&location=" + curLocation + "&fov=80&heading=70&pitch=0&key=AIzaSyCo4C8j7kGJNFnr4hjK3KrANonXc5Dq56c"
-	fmt.Println(url)
-	signedURL, err := api.SignURL(url, "gy3J-mcPumwIoQvr_KUjsFjNm-Y=")
+	// fmt.Println(url)
+	
+	signedURL, err := api.SignURL(url, os.Getenv("SECRET"))
 	if (err != nil){
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "resource ID is required",
@@ -42,14 +44,21 @@ func getPictures(c *gin.Context){
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	router := gin.Default()
 
+	//allow for communcation between front and backend through bypassing CORS protocol
 	router.Use(cors.New(cors.Config{
-        AllowOrigins:     []string{"http://localhost:3000"}, // React app origin
+        AllowOrigins:     []string{"http://localhost:3000"}, 
         AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
         AllowHeaders:     []string{"Origin", "Content-Type", "Accept"},
         AllowCredentials: true,
     }))
+	
 	router.GET("/locations", getLocations)
 	router.GET("/pictures", getPictures)
 
